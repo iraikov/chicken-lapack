@@ -1,0 +1,50 @@
+;; -*- Hen -*-
+
+(define (dynld-name fn)		
+  (make-pathname #f fn ##sys#load-dynamic-extension))	
+
+
+(define (atlas-try-compile header ldflags)
+  (and (try-compile 
+	(string-append "#include <stdlib.h>\n" 
+	               "#include " header "\n" 
+		       "int main() { clapack_sgetrf(0, 0, 0, NULL, 0, NULL) ; return 0; }\n")
+	ldflags: ldflags)
+       ldflags ))
+
+
+(define-syntax atlas-test 
+  (syntax-rules ()
+    ((_ (flags ...))
+     (condition-case (atlas-try-compile flags ...)
+		     (t ()    #f)))))
+
+(define ld-options
+  (or (atlas-test ("<atlas/clapack.h>"   " -llapack_atlas -latlas -lm"))
+      (atlas-test ("<clapack.h>"         " -llapack_atlas -latlas -lm"))
+    
+      (atlas-test ("<atlas/clapack.h>"   " -latlas -lm"))
+      (atlas-test ("<clapack.h>"         " -latlas -lm"))
+    
+      (atlas-test ("<atlas/clapack.h>"   " -llapack_atlas -latlas -lm -lg2c"))
+      (atlas-test ("<clapack.h>"         " -llapack_atlas -latlas -lm -lg2c"))
+    
+      (atlas-test ("<atlas/clapack.h>"   " -latlas -lm -lg2c"))
+      (atlas-test ("<clapack.h>"         " -latlas -lm -lg2c"))
+
+      (atlas-test ("<atlas/clapack.h>"   " -lsatlas -lm"))
+      (atlas-test ("<clapack.h>"         " -lsatlas -lm"))
+
+      (error "unable to figure out location of ATLAS library")
+      ))
+
+
+(compile -O3 -d0 -s atlas-lapack.scm -j atlas-lapack -L "\"" ,ld-options "\"" )
+(compile -O2 -d0 -s atlas-lapack.import.scm)
+
+(install-extension 
+ 'atlas-lapack
+ `(,(dynld-name "atlas-lapack") ,(dynld-name "atlas-lapack.import") )
+ `((version 3.1)
+   ))
+

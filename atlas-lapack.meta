@@ -1,0 +1,26 @@
+;; -*- Hen -*-
+
+((egg "atlas-lapack.egg") ; This should never change
+
+ ; List here all the files that should be bundled as part of your egg.  
+
+ (files "atlas-lapack.setup" "atlas-lapack.meta" "atlas-lapack.scm" "tests" )
+
+ ; Your egg's license:
+
+ (license "GPL-3")
+
+ ; Pick one from the list of categories (see below) for your egg and
+ ; enter it here.
+
+ (category math)
+
+ ; A list of eggs atlas-lapack depends on.
+
+ (needs bind blas)
+
+ (test-depends test)
+
+ (author "Ivan Raikov")
+
+ (synopsis "An interface to the LAPACK routines implemented in ATLAS."))
