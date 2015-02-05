@@ -2,23 +2,17 @@
 
 Chicken Scheme bindings for ATLAS and LAPACK
 
-== Usage
 
-(require-extension atlas-lapack)
-
-== Documentation
-
-
-[[http://math-atlas.sourceforge.net/|ATLAS]] stands for Automatically
+ATLAS (http://math-atlas.sourceforge.net) stands for Automatically
 Tuned Linear Algebra Software. Its purpose is to provide portably
 optimal linear algebra routines. The current version provides a
-complete [[http://www.netlib.org/blas|BLAS]] API (for both C and
-Fortran77), and a very small subset of the
-[[http://www.netlib.org/lapack|LAPACK]] API. Please see the
-documentation for the [[blas]] egg for definitions of the {{ORDER}},
-{{UPLO}}, {{DIAG}} and {{TRANSPOSE}} datatypes.
+complete BLAS (http://www.netlib.org/blas) API (for both C and
+Fortran77), and a small subset of the LAPACK
+(http://www.netlib.org/lapack) API. Please see the documentation for
+the [[blas]] egg for definitions of the {{ORDER}}, {{UPLO}}, {{DIAG}}
+and {{TRANSPOSE}} datatypes.
 
-=== Naming conventions for routines
+## Conventions for routines
 
 
 Every routine in the LAPACK library comes in four flavors, each
@@ -49,7 +43,7 @@ In addition, each ATLAS-LAPACK routine in this egg comes in three flavors:
 
 For example, function ''xGESV'' (N-by-N linear system solver) comes in the following variants: 
 
-<table><tr><th>'''LAPACK name'''</th><th>'''Safe, pure'''</th><th>'''Safe, destructive'''</th><th>'''Unsafe, destructive'''</th></tr>
+<table><tr><th>LAPACK name</th><th>Safe, pure</th><th>Safe, destructive</th><th>Unsafe, destructive</th></tr>
 <tr><td>''SGESV''</td><td>''sgesv''</td><td>''sgesv!''</td><td>''unsafe-sgesv!''</td></tr>
 <tr><td>''DGESV''</td><td>''dgesv''</td><td>''dgesv!''</td><td>''unsafe-dgesv!''</td></tr>
 <tr><td>''CGESV''</td><td>''cgesv''</td><td>''cgesv!''</td><td>''unsafe-cgesv!''</td></tr>
@@ -57,10 +51,10 @@ For example, function ''xGESV'' (N-by-N linear system solver) comes in the follo
 </table>
 
 
-=== LAPACK driver routines
+## LAPACK driver routines
 
 
-==== General linear system solving
+### General linear system solving
 
 
 <procedure>sgesv:: ORDER * N * NRHS * A * B * [LDA] * [LDB] -> F32VECTOR * F32VECTOR * S32VECTOR</procedure>
@@ -90,7 +84,7 @@ system. The return values are:
 
 
 
-==== Symmetric positive definite linear system solving
+### Symmetric positive definite linear system solving
 
 
 <procedure>sposv:: ORDER * UPLO * N * NRHS * A * B * [LDA] * [LDB] -> F32VECTOR * F32VECTOR</procedure>
@@ -117,10 +111,10 @@ where ''U'' is an upper triangular, and ''L'' is a lower triangular matrix. The 
 
 
 
-=== LAPACK computational routines
+## LAPACK computational routines
 
 
-==== General matrix factorization
+### General matrix factorization
 
 
 <procedure>sgetrf:: ORDER * M * N * A * [LDA] -> F32VECTOR * S32VECTOR</procedure>
@@ -143,7 +137,7 @@ are:
 
 
 
-==== General linear system solving using factorization
+### General linear system solving using factorization
 
 
 <procedure>sgetrs:: ORDER * TRANSPOSE * N * NRHS * A * B * [LDA] * [LDB] -> F32VECTOR</procedure>
@@ -166,7 +160,7 @@ is the solution matrix ''X''.
 
 
 
-==== General matrix invert using factorization
+### General matrix invert using factorization
 
 
 <procedure>sgetri:: ORDER * N * A * PIVOT * [LDA] -> F32VECTOR</procedure>
@@ -189,7 +183,7 @@ original matrix ''A''.
 
 
 
-==== Symmetric positive definite matrix factorization
+### Symmetric positive definite matrix factorization
 
 
 <procedure>spotrf:: ORDER * UPLO * N * A * [LDA] -> F32VECTOR</procedure>
@@ -212,7 +206,7 @@ factorization, depending on the value of argument UPLO.
 
 
 
-==== Symmetric positive definite matrix solving using factorization
+### Symmetric positive definite matrix solving using factorization
 
 
 <procedure>spotrs:: ORDER * UPLO * N * NRHS * A * B * [LDA] * [LDB] -> F32VECTOR</procedure>
@@ -237,7 +231,7 @@ respectively. The return value is the solution matrix ''X''.
 
 
 
-==== Symmetric positive definite matrix invert using factorization
+### Symmetric positive definite matrix invert using factorization
 
 
 <procedure>spotri:: ORDER * UPLO * N * A * [LDA] -> F32VECTOR</procedure>
@@ -261,7 +255,7 @@ inverse of ''A''.
 
 
 
-==== Triangular matrix invert
+### Triangular matrix invert
 
 
 <procedure>strtri:: ORDER * UPLO * DIAG * N * A * [LDA] -> F32VECTOR</procedure>
@@ -285,7 +279,7 @@ inverse of the input matrix, in the same storage format.
 
 
 
-==== Auxilliary routines
+### Auxilliary routines
 
 
 <procedure>slauum:: ORDER * UPLO * DIAG * N * A * [LDA] -> F32VECTOR</procedure>
@@ -309,8 +303,9 @@ in the respective storage format.
 
 
 
-== Examples
+## Examples
  
+```scheme
  (use srfi-4 blas atlas-lapack)
  
  (define order ColMajor)
@@ -338,39 +333,32 @@ in the respective storage format.
  ;; A is overwritten with its LU decomposition, and 
  ;; b is overwritten with the solution of the system
  (dgesv! order n nrhs A b)
- 
+``` 
 
-== About this egg
-
-
-=== Author
-
-[[/users/ivan-raikov|Ivan Raikov]]
-
-=== Version history
+## Version history
 
 ; 3.0 : Using bind instead of easyffi
 ; 2.1 : Ensure that unit test script exists with a non-zero exit status on error (thanks to mario)
 ; 2.0 : Eliminated reduntant atlas-lapack: prefix from names of exported symbols
 
-=== Requirements
+## Requirements
 
 [[blas]]
 
-=== License
+## License
 
-
- Copyright 2007-2015 Ivan Raikov
- 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- A full copy of the GPL license can be found at
- <http://www.gnu.org/licenses/>.
+>
+> Copyright 2007-2015 Ivan Raikov
+> 
+> This program is free software: you can redistribute it and/or modify
+> it under the terms of the GNU General Public License as published by
+> the Free Software Foundation, either version 3 of the License, or (at
+> your option) any later version.
+> 
+> This program is distributed in the hope that it will be useful, but
+> WITHOUT ANY WARRANTY; without even the implied warranty of
+> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+> General Public License for more details.
+> 
+> A full copy of the GPL license can be found at
+> <http://www.gnu.org/licenses/>.
