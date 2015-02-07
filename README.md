@@ -12,7 +12,7 @@ Fortran77), and a small subset of the LAPACK
 the [[blas]] egg for definitions of the {{ORDER}}, {{UPLO}}, {{DIAG}}
 and {{TRANSPOSE}} datatypes.
 
-## Conventions for routines
+## Naming conventions for routines
 
 
 Every routine in the LAPACK library comes in four flavors, each
@@ -26,19 +26,9 @@ indicates the format of input data:
 
 
 In addition, each ATLAS-LAPACK routine in this egg comes in three flavors: 
-* Safe, pure 
-''Safe'' routines check the sizes of their input arguments. For example, if a routine is supplied arguments that indicate that an input matrix is of dimensions ''M''-by-''N'', then the argument corresponding to that matrix is checked that it is of size ''M * N''. 
-
-''Pure'' routines do not alter their arguments in any way. A new matrix or vector is allocated for the return value of the routine. 
-
-* Safe, destructive (suffix: !)
-''Safe'' routines check the sizes of their input arguments. For example, if a routine is supplied arguments that indicate that an input matrix is of dimensions ''M''-by-''N'', then the argument corresponding to that matrix is checked that it is of size ''M * N''. 
-
-''Destructive'' routines can modify some or all of their arguments. They  are given names ending in exclamation mark. The matrix factorization routines in LAPACK overwrite the input matrix argument with the result of the factorization, and the linear system solvers overwrite the right-hand side vector with the system solution. Please consult the LAPACK documentation to determine which functions modify their input arguments. 
-
-* Unsafe, destructive (prefix: '''unsafe-:''', suffix: !)
-''Unsafe'' routines do not check the sizes of their input arguments. They invoke the corresponding ATLAS-LAPACK routines directly. Unsafe routines do not have pure variants. 
-
+* Safe, pure: safe routines check the sizes of their input arguments. For example, if a routine is supplied arguments that indicate that an input matrix is of dimensions ''M''-by-''N'', then the argument corresponding to that matrix is checked that it is of size ''M * N''.  ''Pure'' routines do not alter their arguments in any way. A new matrix or vector is allocated for the return value of the routine. 
+* Safe, destructive (suffix: !): safe routines check the sizes of their input arguments. For example, if a routine is supplied arguments that indicate that an input matrix is of dimensions ''M''-by-''N'', then the argument corresponding to that matrix is checked that it is of size ''M * N''. Destructive routines can modify some or all of their arguments. They  are given names ending in exclamation mark. The matrix factorization routines in LAPACK overwrite the input matrix argument with the result of the factorization, and the linear system solvers overwrite the right-hand side vector with the system solution. Please consult the LAPACK documentation to determine which functions modify their input arguments. 
+* Unsafe, destructive (prefix: '''unsafe-:''', suffix: !). Unsafe routines do not check the sizes of their input arguments. They invoke the corresponding ATLAS-LAPACK routines directly. Unsafe routines do not have pure variants. 
 
 
 For example, function ''xGESV'' (N-by-N linear system solver) comes in the following variants: 
@@ -67,21 +57,15 @@ For example, function ''xGESV'' (N-by-N linear system solver) comes in the follo
 
 
 
-The routines compute the solution to a system of linear equations ''A
-* X = B'', where ''A'' is an N-by-N matrix and ''X'' and ''B'' are
-N-by-NRHS matrices. Optional arguments ''LDA'' and ''LDB'' are the
-leading dimensions of arrays ''A'' and ''B'', respectively. LU
-decomposition with partial pivoting and row interchanges is used to
-factor ''A'' as ''A = P * L * U'', where ''P'' is a permutation
-matrix, ''L'' is unit lower triangular, and ''U'' is upper
-triangular. The factored form of ''A'' is then used to solve the
+The routines compute the solution to a system of linear equations ''A * X = B'', where ''A'' is an N-by-N matrix and ''X'' and ''B'' are
+N-by-NRHS matrices. Optional arguments ''LDA'' and ''LDB'' are the leading dimensions of arrays ''A'' and ''B'', respectively. LU
+decomposition with partial pivoting and row interchanges is used to factor ''A'' as ''A = P * L * U'', where ''P'' is a permutation
+matrix, ''L'' is unit lower triangular, and ''U'' is upper triangular. The factored form of ''A'' is then used to solve the
 system. The return values are:
 
-# a matrix containing the factors ''L'' and ''U'' from the factorization ''A = P*L*U''; 
-# the N-by-NRHS solution matrix ''X''
-#  a vector with pivot indices:  for 1 <= i <= min(M,N), row ''i'' of the matrix ''A'' was interchanged with row pivot(''i'')
-
-
+* a matrix containing the factors ''L'' and ''U'' from the factorization ''A = P*L*U''; 
+* the N-by-NRHS solution matrix ''X''
+*  a vector with pivot indices:  for 1 <= i <= min(M,N), row ''i'' of the matrix ''A'' was interchanged with row pivot(''i'')
 
 
 ### Symmetric positive definite linear system solving
@@ -97,18 +81,13 @@ system. The return values are:
 
 
 
-The routines compute the solution to a system of linear equations ''A
-* X = B'', where ''A'' is an N-by-N symmetric positive definite matrix
-and ''X'' and ''B'' are N-by-NRHS matrices. Optional arguments ''LDA''
-and ''LDB'' are the leading dimensions of arrays ''A'' and ''B'',
-respectively. Cholesky decomposition is used to factor ''A'' as
-* ''A = U**T * U''     if UPLO = '''Upper'''
-* ''A = L  * L**T''     if UPLO = '''Lower'''
-where ''U'' is an upper triangular, and ''L'' is a lower triangular matrix. The factored form of ''A'' is then used to solve the system. The return values are: 
+The routines compute the solution to a system of linear equations ''A * X = B'', where ''A'' is an N-by-N symmetric positive definite matrix
+and ''X'' and ''B'' are N-by-NRHS matrices. Optional arguments ''LDA'' and ''LDB'' are the leading dimensions of arrays ''A'' and ''B'',
+respectively. Cholesky decomposition is used to factor ''A'' as * ''A = U**T * U''     if UPLO = '''Upper'''
+* ''A = L  * L**T''     if UPLO = '''Lower''' where ''U'' is an upper triangular, and ''L'' is a lower triangular matrix. 
+The factored form of ''A'' is then used to solve the system. The return values are: 
 # the factor ''U'' or ''L''from the Cholesky factorization, depending on the value of argument UPLO.
 # the N-by-NRHS solution matrix ''X''
-
-
 
 
 ## LAPACK computational routines
@@ -131,10 +110,9 @@ These routines compute an LU factorization of a general M-by-N matrix
 ''A'' using partial pivoting with row interchanges. Optional argument
 ''LDA'' is the leading dimension of array ''A''. The return values
 are:
-# a matrix containing the factors ''L'' and ''U'' from the factorization ''A = P*L*U''; 
-#  a vector with pivot indices:  for 1 <= i <= min(M,N), row ''i'' of the matrix was interchanged with row pivot(''i'')
 
-
+* a matrix containing the factors ''L'' and ''U'' from the factorization ''A = P*L*U''; 
+* a vector with pivot indices:  for 1 <= i <= min(M,N), row ''i'' of the matrix was interchanged with row pivot(''i'')
 
 
 ### General linear system solving using factorization
@@ -197,8 +175,10 @@ original matrix ''A''.
 
 
 These routines compute the Cholesky factorization of a symmetric positive definite matrix ''A''. The factorization has the form: 
+
 * ''A = U**T * U''     if UPLO = '''Upper'''
 * ''A = L  * L**T''     if UPLO = '''Lower'''
+
 where ''U'' is an upper triangular, and ''L'' is a lower triangular
 matrix. Optional argument ''LDA'' is the leading dimension of array
 ''A''. The return value is the factor ''U'' or ''L''from the Cholesky
@@ -318,7 +298,8 @@ in the respective storage format.
  ;;
  ;; where A is the general matrix
  
- (define A (f64vector 1.8   5.25   1.58 -1.11  ;; column-major order
+ ;; column-major order
+ (define A (f64vector 1.8   5.25   1.58 -1.11  
  		     2.88  -2.95 -2.69 -0.66 
  		     2.05  -0.95 -2.90 -0.59 
  		     -0.89 -3.80 -1.04  0.80))
