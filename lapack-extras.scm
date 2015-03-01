@@ -19,46 +19,51 @@
 ;;
 
 (module lapack-extras
-  *
+  (
+   sgeev_
+   dgeev_
+   cgeev_
+   zgeev_
+   sgeev_!
+   dgeev_!
+   cgeev_!
+   zgeev_!
+   unsafe-sgeev_!
+   unsafe-dgeev_!
+   unsafe-cgeev_!
+   unsafe-zgeev_!
+   )
   (import chicken scheme data-structures foreign)
   (use srfi-4 blas bind)
 
 (bind* #<<EOF
-typedef float  CCOMPLEX;
-typedef double ZCOMPLEX;
-
-
-/*
-* Enumerated and derived types from cblas.h
-*/
-
-enum CBLAS_ORDER {CblasRowMajor=101, CblasColMajor=102};
-enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
-enum CBLAS_UPLO {CblasUpper=121, CblasLower=122};
-enum CBLAS_DIAG {CblasNonUnit=131, CblasUnit=132};
-enum CBLAS_SIDE {CblasLeft=141, CblasRight=142};
+typedef float real;
+typedef double doublereal;
+typedef float complex;
+typedef double doublecomplex;
+typedef int integer;
 
 /*
  * LAPACK Eigen Solver Driver Routines
  */
-int sgeev_(char *jobvl, char *jobvr, int *n, float *a,
-	int *lda, float *wr, float *wi, float *vl, int *ldvl, float *vr,
-	int *ldvr, float *work, int *lwork, int *info)
+int sgeev_(char *jobvl, char *jobvr, integer *n, real *a, 
+	integer *lda, real *wr, real *wi, real *vl, integer *ldvl, real *vr, 
+	integer *ldvr, real *work, integer *lwork, integer *info);
 
-int dgeev_(char *jobvl, char *jobvr, int *n, double *a,
-  int *lda, double *wr, double *wi, double *vl,
-	int *ldvl, double *vr, int *ldvr, double *work,
-	int *lwork, int *info);
+int dgeev_(char *jobvl, char *jobvr, integer *n, doublereal *
+	a, integer *lda, doublereal *wr, doublereal *wi, doublereal *vl, 
+	integer *ldvl, doublereal *vr, integer *ldvr, doublereal *work, 
+	integer *lwork, integer *info);
 
-int cgeev_(char *jobvl, char *jobvr, int *n, CCOMPLEX *a,
-	int *lda, CCOMPLEX *w, CCOMPLEX *vl, int *ldvl, CCOMPLEX *vr,
-	int *ldvr, CCOMPLEX *work, int *lwork, real *rwork, int *
-	info)
+int cgeev_(char *jobvl, char *jobvr, integer *n, complex *a, 
+	integer *lda, complex *w, complex *vl, integer *ldvl, complex *vr, 
+	integer *ldvr, complex *work, integer *lwork, real *rwork, integer *
+	info);
 
-int zgeev_(char *jobvl, char *jobvr, int *n,
-	ZCOMPLEX *a, int *lda, ZCOMPLEX *w, ZCOMPLEX *vl,
-	int *ldvl, ZCOMPLEX *vr, int *ldvr, ZCOMPLEX *work,
-	int *lwork, double *rwork, int *info)
+int zgeev_(char *jobvl, char *jobvr, integer *n, 
+	doublecomplex *a, integer *lda, doublecomplex *w, doublecomplex *vl, 
+	integer *ldvl, doublecomplex *vr, integer *ldvr, doublecomplex *work, 
+	integer *lwork, doublereal *rwork, integer *info);
 
 EOF
 )
@@ -101,7 +106,6 @@ EOF
 
            (asize           (r 'asize))
            (bsize           (r 'bsize))
-
            (%define         (r 'define))
            (%begin          (r 'begin))
            (%let            (r 'let))
@@ -154,40 +158,43 @@ EOF
                                    ((> info 0) (atlas-lapack:error ',fname (,(cadr errs) info)))))))))
     ))
 
-(define-syntax lapack-wrapx 
+(define-syntax lapack-wrapx
       (lambda (x r c)
-	(let* ((fn     (cadr x))
-	       (ret    (caddr x))
-	       (errs   (cadddr x)))
-	  `(begin
-	     (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs #f #f)
-	     (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs #f #f)
-	     (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs #f #f)
-	     (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs #f #f)
-	     
-	     (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs f32vector-length #f)
-	     (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs f64vector-length #f)
-	     (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) #f)
-	     (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) #f)
-	     
-	     (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs f32vector-length  scopy)
-	     (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs f64vector-length  dcopy)
-	     (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) ccopy)
-	     (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-			  ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) zcopy))))
+  (let* ((fn     (cadr x))
+         (ret    (caddr x))
+         (errs   (cadddr x)))
+    `(begin
+       (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs #f #f)
+       (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs #f #f)
+       (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs #f #f)
+       (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs #f #f)
+
+       (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs f32vector-length #f)
+       (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs f64vector-length #f)
+       (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) #f)
+       (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) #f)
+
+       (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs f32vector-length  scopy)
+       (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs f64vector-length  dcopy)
+       (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) ccopy)
+       (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
+        ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) zcopy))))
       )
 
-
+(lapack-wrapx (geev_ jobvl jobvr n a lda wr wi vl ldvl vr ldvr work lwork info)
+              (a wr wi vl vr work info)
+              ((lambda (i) "Some error")
+               (lambda (i) "Some error")))
 
 )
