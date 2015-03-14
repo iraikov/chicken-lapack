@@ -46,23 +46,23 @@ typedef int integer;
 /*
  * LAPACK Eigen Solver Driver Routines
  */
-int sgeev_(char *jobvl, char *jobvr, integer *n, real *a, 
-	integer *lda, real *wr, real *wi, real *vl, integer *ldvl, real *vr, 
+int sgeev_(char *jobvl, char *jobvr, integer *n, real *a,
+	integer *lda, real *wr, real *wi, real *vl, integer *ldvl, real *vr,
 	integer *ldvr, real *work, integer *lwork, integer *info);
 
 int dgeev_(char *jobvl, char *jobvr, integer *n, doublereal *
-	a, integer *lda, doublereal *wr, doublereal *wi, doublereal *vl, 
-	integer *ldvl, doublereal *vr, integer *ldvr, doublereal *work, 
+	a, integer *lda, doublereal *wr, doublereal *wi, doublereal *vl,
+	integer *ldvl, doublereal *vr, integer *ldvr, doublereal *work,
 	integer *lwork, integer *info);
 
-int cgeev_(char *jobvl, char *jobvr, integer *n, complex *a, 
-	integer *lda, complex *w, complex *vl, integer *ldvl, complex *vr, 
+int cgeev_(char *jobvl, char *jobvr, integer *n, complex *a,
+	integer *lda, complex *w, complex *vl, integer *ldvl, complex *vr,
 	integer *ldvr, complex *work, integer *lwork, real *rwork, integer *
 	info);
 
-int zgeev_(char *jobvl, char *jobvr, integer *n, 
-	doublecomplex *a, integer *lda, doublecomplex *w, doublecomplex *vl, 
-	integer *ldvl, doublecomplex *vr, integer *ldvr, doublecomplex *work, 
+int zgeev_(char *jobvl, char *jobvr, integer *n,
+	doublecomplex *a, integer *lda, doublecomplex *w, doublecomplex *vl,
+	integer *ldvl, doublecomplex *vr, integer *ldvr, doublecomplex *work,
 	integer *lwork, doublereal *rwork, integer *info);
 
 EOF
@@ -99,8 +99,8 @@ EOF
                         (let ((x (car args)))
                          (let ((sig (case x
                                       ((opiv) sig)
-                                      ((lda)  sig)
-                                      ((ldb)  sig)
+                                      ;((lda)  sig)
+                                      ;((ldb)  sig)
                                       (else   (cons x sig)))))
                            (loop (cdr args) sig))))))
 
@@ -192,8 +192,8 @@ EOF
         ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) zcopy))))
       )
 
-(lapack-wrapx (geev_ jobvl jobvr n a lda wr wi vl ldvl vr ldvr work lwork info)
-              (a wr wi vl vr work info)
+(lapack-wrapx (geev_ jobvl jobvr n a lda wr wi vl ldvl vr ldvr work lwork info_)
+              (a wr wi vl vr work)
               ((lambda (i) "Some error")
                (lambda (i) "Some error")))
 
