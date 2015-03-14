@@ -2,7 +2,7 @@
 
 (define N (s32vector 3))
 (define A (f64vector 1 2 3 4 5 6 7 8 9))
-(define LDA (s32vector 3))
+(define LDA (s32vector 4))
 (define WR (make-f64vector 3 0))
 (define WI (make-f64vector 3 0))
 (define VL (make-f64vector 3 0))
