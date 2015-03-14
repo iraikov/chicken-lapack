@@ -99,8 +99,10 @@ EOF
                         (let ((x (car args)))
                          (let ((sig (case x
                                       ((opiv) sig)
-                                      ;((lda)  sig)
-                                      ;((ldb)  sig)
+                                      ((lda)  sig)
+                                      ((ldb)  sig)
+                                      ((ldvl) sig)
+                                      ((ldvr) sig)
                                       (else   (cons x sig)))))
                            (loop (cdr args) sig))))))
 
@@ -114,48 +116,54 @@ EOF
            (%if             (r 'if))
            (%let-optionals  (r 'let-optionals)))
 
+      (display fn)
+      (newline)
       `(,%define ,fsig
          (,%let-optionals rest ,(if (memq 'ldb fn)
                                   `((lda ,(if (memq 'm fn) 'm 'n))
-                                    (ldb ,(if (memq 'm fn) 'm 'n)))
-                                  `((lda ,(if (memq 'm fn) 'm 'n))))
+                                    (ldb ,(if (memq 'm fn) 'm 'n))
+                                    (ldvl ,(if (memq 'm fn) 'm 'n))
+                                    (ldvr ,(if (memq 'm fn) 'm 'n)))
+                                  `((lda ,(if (memq 'm fn) 'm 'n))
+                                    (ldvl ,(if (memq 'm fn) 'm 'n))
+                                    (ldvr ,(if (memq 'm fn) 'm 'n))))
 
-                          ,(if vsize
-                             `(,%begin
-                                (let ((,asize (,vsize a)))
-                                 ,(if (memq 'm fn)
-                                    `(if (< ,asize (fx* m n))
-                                       (atlas-lapack:error ',fname (conc "matrix A is allocated " ,asize " elements "
-                                                                         "but given dimensions are " m " by " n)))
-                                    `(if (< ,asize (fx* n n))
-                                       (atlas-lapack:error ',fname (conc "matrix A is allocated " ,asize " elements "
-                                                                         "but given dimensions are " n " by " n)))))
-                                ,(if (memq 'b fn)
-                                   `(let ((,bsize (,vsize b)))
-                                     ,(if (memq 'nrhs fn)
-                                        `(if (< ,bsize (fx* nrhs n))
-                                           (atlas-lapack:error ',fname (conc "matrix B is allocated " ,bsize " elements "
-                                                                             "but given dimensions are " n " by " nrhs)))
-                                        `(if (< ,bsize (fx* n 1))
-                                           (atlas-lapack:error ,fname (conc "matrix B is allocated " ,bsize " elements "
-                                                                            "but given dimensions are " n " by " 1)))))
-                                   `(,%begin)))
-                             `(,%begin))
+           ,(if vsize
+              `(,%begin
+                 (let ((,asize (,vsize a)))
+                  ,(if (memq 'm fn)
+                     `(if (< ,asize (fx* m n))
+                        (atlas-lapack:error ',fname (conc "matrix A is allocated " ,asize " elements "
+                                                          "but given dimensions are " m " by " n)))
+                     `(if (< ,asize (fx* n n))
+                        (atlas-lapack:error ',fname (conc "matrix A is allocated " ,asize " elements "
+                                                          "but given dimensions are " n " by " n)))))
+                 ,(if (memq 'b fn)
+                    `(let ((,bsize (,vsize b)))
+                      ,(if (memq 'nrhs fn)
+                         `(if (< ,bsize (fx* nrhs n))
+                            (atlas-lapack:error ',fname (conc "matrix B is allocated " ,bsize " elements "
+                                                              "but given dimensions are " n " by " nrhs)))
+                         `(if (< ,bsize (fx* n 1))
+                            (atlas-lapack:error ,fname (conc "matrix B is allocated " ,bsize " elements "
+                                                             "but given dimensions are " n " by " 1)))))
+                    `(,%begin)))
+              `(,%begin))
 
-                          (let ,(let loop ((fn fn) (bnds '()))
-                                 (if (null? fn) bnds
-                                   (let ((x (car fn)))
-                                    (let ((bnds (case x
-                                                  ((opiv)  (cons `(opiv (make-s32vector n)) bnds))
-                                                  (else    (if (and copy (memq x ret))
-                                                             (cons `(,x (,copy ,x)) bnds)
-                                                             bnds)))))
-                                      (loop (cdr fn) bnds)))))
+           (let ,(let loop ((fn fn) (bnds '()))
+                  (if (null? fn) bnds
+                    (let ((x (car fn)))
+                     (let ((bnds (case x
+                                   ((opiv)  (cons `(opiv (make-s32vector n)) bnds))
+                                   (else    (if (and copy (memq x ret))
+                                              (cons `(,x (,copy ,x)) bnds)
+                                              bnds)))))
+                       (loop (cdr fn) bnds)))))
 
-                            (let ((info (,cfname . ,(cdr fn))))
-                             (cond ((= info 0) (values . ,ret))
-                                   ((< info 0) (atlas-lapack:error ',fname (,(car errs) info)))
-                                   ((> info 0) (atlas-lapack:error ',fname (,(cadr errs) info)))))))))
+             (let ((info (,cfname . ,(cdr fn))))
+              (cond ((= info 0) (values . ,ret))
+                    ((< info 0) (atlas-lapack:error ',fname (,(car errs) info)))
+                    ((> info 0) (atlas-lapack:error ',fname (,(cadr errs) info)))))))))
     ))
 
 (define-syntax lapack-wrapx
@@ -194,7 +202,8 @@ EOF
 
 (lapack-wrapx (geev_ jobvl jobvr n a lda wr wi vl ldvl vr ldvr work lwork info_)
               (a wr wi vl vr work)
-              ((lambda (i) "Some error")
-               (lambda (i) "Some error")))
-
+              ((lambda (i) (conc i "-th element had an illegal value."))
+               (lambda (i) (conc "QR algorithm failed. Elements "
+                                 i
+                                 "+1:N of WR and WI contain eigenvalues which have converged."))))
 )
