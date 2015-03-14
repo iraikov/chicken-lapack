@@ -7,10 +7,10 @@
 (define WI (make-f64vector 3 0))
 (define VL (make-f64vector 3 0))
 (define VR (make-f64vector 3 0))
-(define LDVL (s32vector 3))
-(define LDVR (s32vector 3))
+;(define LDVL (s32vector 3))
+;(define LDVR (s32vector 3))
 (define WORK (make-f64vector 12 0))
 (define LWORK (s32vector 12))
 (define INFO (f64vector 0))
 
-(dgeev_ "N" "N" N A WR WI VL VR WORK LWORK INFO)
+(dgeev_ "V" "V" N A WR WI VL VR WORK LWORK INFO)
