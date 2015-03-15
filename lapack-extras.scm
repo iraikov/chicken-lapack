@@ -68,13 +68,13 @@ int zgeev_(char *jobvl, char *jobvr, integer *n,
 EOF
 )
 
-(define (atlas-lapack:error x . rest)
+(define (lapack-extras:error x . rest)
   (let ((port (open-output-string)))
    (let loop ((objs (if (symbol? x) rest (cons x rest))))
     (if (null? objs)
       (begin
         (newline port)
-        (error (if (symbol? x) x 'atlas-lapack)
+        (error (if (symbol? x) x 'lapack-extras)
                (get-output-string port)))
       (begin (display (car objs) port)
              (display " " port)
@@ -132,19 +132,19 @@ EOF
                        (nval (s32vector-ref n 0)))
                   ,(if (memq 'm fn)
                      `(if (< ,asize (fx* m n))
-                        (atlas-lapack:error ',fname (conc "matrix A is allocated " ,asize " elements "
+                        (lapack-extras:error ',fname (conc "matrix A is allocated " ,asize " elements "
                                                           "but given dimensions are " m " by " n)))
                      `(if (< ,asize (fx* nval nval))
-                        (atlas-lapack:error ',fname (conc "matrix A is allocated " ,asize " elements "
+                        (lapack-extras:error ',fname (conc "matrix A is allocated " ,asize " elements "
                                                           "but given dimensions are " nval " by " nval)))))
                 ; ,(if (memq 'b fn)
                 ;    `(let ((,bsize (,vsize b)))
                 ;      ,(if (memq 'nrhs fn)
                 ;         `(if (< ,bsize (fx* nrhs n))
-                ;            (atlas-lapack:error ',fname (conc "matrix B is allocated " ,bsize " elements "
+                ;            (lapack-extras:error ',fname (conc "matrix B is allocated " ,bsize " elements "
                 ;                                              "but given dimensions are " n " by " nrhs)))
                 ;         `(if (< ,bsize (fx* n 1))
-                ;            (atlas-lapack:error ,fname (conc "matrix B is allocated " ,bsize " elements "
+                ;            (lapack-extras:error ,fname (conc "matrix B is allocated " ,bsize " elements "
                 ;                                             "but given dimensions are " n " by " 1)))))
                 ;    `(,%begin))
                 ;
@@ -161,10 +161,11 @@ EOF
                                               bnds)))))
                        (loop (cdr fn) bnds)))))
 
-             (let ((info (,cfname . ,(cdr fn))))
+             (let ((ret (,cfname . ,(cdr fn)))
+                   (info (s32vector-ref info_ 0)))
               (cond ((= info 0) (values . ,ret))
-                    ((< info 0) (atlas-lapack:error ',fname (,(car errs) info)))
-                    ((> info 0) (atlas-lapack:error ',fname (,(cadr errs) info)))))))))
+                    ((< info 0) (lapack-extras:error ',fname (,(car errs) info)))
+                    ((> info 0) (lapack-extras:error ',fname (,(cadr errs) info)))))))))
     ))
 
 (define-syntax lapack-wrapx

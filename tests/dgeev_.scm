@@ -11,6 +11,6 @@
 ;(define LDVR (s32vector 3))
 (define WORK (make-f64vector 12 0))
 (define LWORK (s32vector 12))
-(define INFO (f64vector 0))
+(define INFO (s32vector 0))
 
 (dgeev_ "V" "V" N A WR WI VL VR WORK LWORK INFO)
