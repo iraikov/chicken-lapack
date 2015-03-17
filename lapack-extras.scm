@@ -128,15 +128,14 @@ EOF
 
            ,(if vsize
               `(,%begin
-                 (let ((,asize (,vsize a))
-                       (nval (s32vector-ref n 0)))
+                 (let ((,asize (,vsize a)))
                   ,(if (memq 'm fn)
                      `(if (< ,asize (fx* m n))
                         (lapack-extras:error ',fname (conc "matrix A is allocated " ,asize " elements "
                                                           "but given dimensions are " m " by " n)))
-                     `(if (< ,asize (fx* nval nval))
+                     `(if (< ,asize (* n n))
                         (lapack-extras:error ',fname (conc "matrix A is allocated " ,asize " elements "
-                                                          "but given dimensions are " nval " by " nval)))))
+                                                          "but given dimensions are " n " by " n)))))
                 ; ,(if (memq 'b fn)
                 ;    `(let ((,bsize (,vsize b)))
                 ;      ,(if (memq 'nrhs fn)
