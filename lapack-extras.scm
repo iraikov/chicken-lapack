@@ -208,5 +208,5 @@ EOF
               ((lambda (i) (conc i "-th element had an illegal value."))
                (lambda (i) (conc "QR algorithm failed. Elements "
                                  i
-                                 "+1:N of WR and WI contain eigenvalues which have converged."))))
+                                 "+1:N of W(R|I) contain eigenvalues which have converged."))))
 )
