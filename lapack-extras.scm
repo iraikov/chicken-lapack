@@ -20,18 +20,18 @@
 
 (module lapack-extras
   (
-   sgeev_
-   dgeev_
-   cgeev_
-   zgeev_
-   sgeev_!
-   dgeev_!
-   cgeev_!
-   zgeev_!
-   unsafe-sgeev_!
-   unsafe-dgeev_!
-   unsafe-cgeev_!
-   unsafe-zgeev_!
+   sgeev
+   dgeev
+   cgeev
+   zgeev
+   sgeev!
+   dgeev!
+   cgeev!
+   zgeev!
+   unsafe-sgeev!
+   unsafe-dgeev!
+   unsafe-cgeev!
+   unsafe-zgeev!
    )
   (import chicken scheme data-structures foreign)
   (use srfi-4 blas bind)
@@ -84,7 +84,7 @@ EOF
 (define-syntax lapack-wrap
   (lambda (x r c)
     (let* ((fn      (cadr x))
-           (cfname  (car fn))
+           (cfname  (string->symbol (conc (symbol->string (car fn)) "_")))
            (ret     (caddr x))
            (errs    (cadddr x))
            (vsize   (car (cddddr x)))
@@ -94,17 +94,18 @@ EOF
                                           (if copy "" "!"))))
            (args    (reverse (cdr fn)))
 
-           (fsig     (let loop ((args args) (sig 'rest))
-                      (if (null? args) (cons fname sig)
-                        (let ((x (car args)))
-                         (let ((sig (case x
-                                      ((opiv) sig)
-                                      ((lda)  sig)
-                                      ((ldb)  sig)
-                                      ((ldvl) sig)
-                                      ((ldvr) sig)
-                                      (else   (cons x sig)))))
-                           (loop (cdr args) sig))))))
+           (fsig    (let loop ((args args) (sig 'rest))
+                     (if (null? args) (cons fname sig)
+                       (let ((x (car args)))
+                        (let ((sig (case x
+                                     ((nvec) (cons 'n sig))
+                                     ((opiv) sig)
+                                     ((lda)  sig)
+                                     ((ldb)  sig)
+                                     ((ldvl) sig)
+                                     ((ldvr) sig)
+                                     (else   (cons x sig)))))
+                          (loop (cdr args) sig))))))
 
            (asize           (r 'asize))
            (bsize           (r 'bsize))
@@ -118,13 +119,13 @@ EOF
 
       `(,%define ,fsig
          (,%let-optionals rest ,(if (memq 'ldb fn)
-                                  `((lda ,(if (memq 'm fn) 'm 'n))
-                                    (ldb ,(if (memq 'm fn) 'm 'n))
-                                    (ldvl ,(if (memq 'm fn) 'm 'n))
-                                    (ldvr ,(if (memq 'm fn) 'm 'n)))
-                                  `((lda ,(if (memq 'm fn) 'm 'n))
-                                    (ldvl ,(if (memq 'm fn) 'm 'n))
-                                    (ldvr ,(if (memq 'm fn) 'm 'n))))
+                                  `((lda  (s32vector ,(if (memq 'm fn) 'm 'n)))
+                                    (ldb  (s32vector ,(if (memq 'm fn) 'm 'n)))
+                                    (ldvl (s32vector ,(if (memq 'm fn) 'm 'n)))
+                                    (ldvr (s32vector ,(if (memq 'm fn) 'm 'n))))
+                                  `((lda  (s32vector ,(if (memq 'm fn) 'm 'n)))
+                                    (ldvl (s32vector ,(if (memq 'm fn) 'm 'n)))
+                                    (ldvr (s32vector ,(if (memq 'm fn) 'm 'n)))))
 
            ,(if vsize
               `(,%begin
@@ -136,17 +137,17 @@ EOF
                      `(if (< ,asize (* n n))
                         (lapack-extras:error ',fname (conc "matrix A is allocated " ,asize " elements "
                                                           "but given dimensions are " n " by " n)))))
-                ; ,(if (memq 'b fn)
-                ;    `(let ((,bsize (,vsize b)))
-                ;      ,(if (memq 'nrhs fn)
-                ;         `(if (< ,bsize (fx* nrhs n))
-                ;            (lapack-extras:error ',fname (conc "matrix B is allocated " ,bsize " elements "
-                ;                                              "but given dimensions are " n " by " nrhs)))
-                ;         `(if (< ,bsize (fx* n 1))
-                ;            (lapack-extras:error ,fname (conc "matrix B is allocated " ,bsize " elements "
-                ;                                             "but given dimensions are " n " by " 1)))))
-                ;    `(,%begin))
-                ;
+                 ,(if (memq 'b fn)
+                    `(let ((,bsize (,vsize b)))
+                      ,(if (memq 'nrhs fn)
+                         `(if (< ,bsize (fx* nrhs n))
+                            (lapack-extras:error ',fname (conc "matrix B is allocated " ,bsize " elements "
+                                                              "but given dimensions are " n " by " nrhs)))
+                         `(if (< ,bsize (fx* n 1))
+                            (lapack-extras:error ,fname (conc "matrix B is allocated " ,bsize " elements "
+                                                             "but given dimensions are " n " by " 1)))))
+                    `(,%begin))
+
                  )
               `(,%begin))
 
@@ -154,7 +155,8 @@ EOF
                   (if (null? fn) bnds
                     (let ((x (car fn)))
                      (let ((bnds (case x
-                                   ((opiv)  (cons `(opiv (make-s32vector n)) bnds))
+                                   ((opiv) (cons `(opiv (make-s32vector n)) bnds))
+                                   ((nvec) (cons `(nvec (s32vector n)) bnds))
                                    (else    (if (and copy (memq x ret))
                                               (cons `(,x (,copy ,x)) bnds)
                                               bnds)))))
@@ -187,21 +189,21 @@ EOF
        (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
         ,ret ,errs f64vector-length #f)
        (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) #f)
+        ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) #f)
        (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) #f)
+        ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) #f)
 
        (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
         ,ret ,errs f32vector-length  scopy)
        (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
         ,ret ,errs f64vector-length  dcopy)
        (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) ccopy)
+        ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) ccopy)
        (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) zcopy))))
+        ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) zcopy))))
       )
 
-(lapack-wrapx (geev_ jobvl jobvr n a lda wr wi vl ldvl vr ldvr work lwork info_)
+(lapack-wrapx (geev jobvl jobvr nvec a lda wr wi vl ldvl vr ldvr work lwork info_)
               (a wr wi vl vr work)
               ((lambda (i) (conc i "-th element had an illegal value."))
                (lambda (i) (conc "QR algorithm failed. Elements "
