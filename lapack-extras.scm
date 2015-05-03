@@ -98,7 +98,8 @@ EOF
                      (if (null? args) (cons fname sig)
                        (let ((x (car args)))
                         (let ((sig (case x
-                                     ((nvec) (cons 'n sig))
+                                     ((nvec)  (cons 'n sig))
+                                     ((lwork) (cons 'lwork sig))
                                      ((opiv) sig)
                                      ((lda)  sig)
                                      ((ldb)  sig)
@@ -155,8 +156,9 @@ EOF
                   (if (null? fn) bnds
                     (let ((x (car fn)))
                      (let ((bnds (case x
-                                   ((opiv) (cons `(opiv (make-s32vector n)) bnds))
-                                   ((nvec) (cons `(nvec (s32vector n)) bnds))
+                                   ((opiv)  (cons `(opiv (make-s32vector n)) bnds))
+                                   ((nvec)  (cons `(nvec (s32vector n)) bnds))
+                                   ((lwork) (cons `(lwork (s32vector lwork)) bnds))
                                    (else    (if (and copy (memq x ret))
                                               (cons `(,x (,copy ,x)) bnds)
                                               bnds)))))
