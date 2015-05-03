@@ -449,18 +449,18 @@ EOF
        (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
         ,ret ,errs f64vector-length #f)
        (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) #f)
+        ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) #f)
        (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) #f)
+        ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) #f)
 
        (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
         ,ret ,errs f32vector-length  scopy)
        (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
         ,ret ,errs f64vector-length  dcopy)
        (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f32vector-length v))) ccopy)
+        ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) ccopy)
        (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ 2 (f64vector-length v))) zcopy))))
+        ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) zcopy))))
       )
 
 
