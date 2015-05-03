@@ -169,41 +169,45 @@ EOF
                     ((> info 0) (lapack-extras:error ',fname (,(cadr errs) info)))))))))
     ))
 
-(define-syntax lapack-wrapx
-      (lambda (x r c)
-  (let* ((fn     (cadr x))
-         (ret    (caddr x))
-         (errs   (cadddr x)))
-    `(begin
-       (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs #f #f)
-       (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs #f #f)
-       (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs #f #f)
-       (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs #f #f)
+(define-syntax lapack-wrap-sd
+  (lambda (x r c)
+    (let* ([fn (cadr x)]
+           [ret (caddr x)]
+           [errs (cadddr x)])
+      `(begin
+         (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs #f #f)
+         (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs #f #f)
+         (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs f32vector-length #f)
+         (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs f64vector-length #f)
+         (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs f32vector-length  scopy)
+         (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs f64vector-length  dcopy)))))
 
-       (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs f32vector-length #f)
-       (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs f64vector-length #f)
-       (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) #f)
-       (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) #f)
+(define-syntax lapack-wrap-cz
+  (lambda (x r c)
+    (let* ([fn (cadr x)]
+           [ret (caddr x)]
+           [errs (cadddr x)])
+      `(begin
+         (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs #f #f)
+         (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs #f #f)
+         (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) #f)
+         (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) #f)
+         (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) ccopy)
+         (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
+                      ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) zcopy)))))
 
-       (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs f32vector-length  scopy)
-       (lapack-wrap ,(cons (string->symbol (conc "d" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs f64vector-length  dcopy)
-       (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ (f32vector-length v) 2)) ccopy)
-       (lapack-wrap ,(cons (string->symbol (conc "z" (symbol->string (car fn)))) (cdr fn))
-        ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) zcopy))))
-      )
-
-(lapack-wrapx (geev jobvl jobvr nvec a lda wr wi vl ldvl vr ldvr work lwork info_)
+(lapack-wrap-sd (geev jobvl jobvr nvec a lda wr wi vl ldvl vr ldvr work lwork info_)
               (a wr wi vl vr work)
               ((lambda (i) (conc i "-th element had an illegal value."))
                (lambda (i) (conc "QR algorithm failed. Elements "
