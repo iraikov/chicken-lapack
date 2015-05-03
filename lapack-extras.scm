@@ -171,8 +171,8 @@ EOF
 
 (define-syntax lapack-wrap-sd
   (lambda (x r c)
-    (let* ([fn (cadr x)]
-           [ret (caddr x)]
+    (let* ([fn   (cadr x)]
+           [ret  (caddr x)]
            [errs (cadddr x)])
       `(begin
          (lapack-wrap ,(cons (string->symbol (conc "s" (symbol->string (car fn)))) (cdr fn))
@@ -190,8 +190,8 @@ EOF
 
 (define-syntax lapack-wrap-cz
   (lambda (x r c)
-    (let* ([fn (cadr x)]
-           [ret (caddr x)]
+    (let* ([fn   (cadr x)]
+           [ret  (caddr x)]
            [errs (cadddr x)])
       `(begin
          (lapack-wrap ,(cons (string->symbol (conc "c" (symbol->string (car fn)))) (cdr fn))
@@ -213,11 +213,11 @@ EOF
                  (lambda (i) (conc "QR algorithm failed. Elements "
                                    i
                                    "+1:N of W(R|I) contain eigenvalues which have converged."))))
+
 (lapack-wrap-cz (geev jobvl jobvr nvec a lda w vl ldvl vr ldvr work lwork rwork info_)
                 (a w vl vr work)
                 ((lambda (i) (conc i "-th element had an illegal value."))
                  (lambda (i) (conc "QR algorithm failed. Elements "
                                    i
                                    "+1:N of W contain eigenvalues which have converged."))))
-
 )
