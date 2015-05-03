@@ -36,7 +36,7 @@
   (import chicken scheme data-structures foreign)
   (use srfi-4 blas bind)
 
-(bind* #<<EOF
+(bind* "
 typedef float real;
 typedef double doublereal;
 typedef float complex;
@@ -64,9 +64,7 @@ int zgeev_(char *jobvl, char *jobvr, integer *n,
 	doublecomplex *a, integer *lda, doublecomplex *w, doublecomplex *vl,
 	integer *ldvl, doublecomplex *vr, integer *ldvr, doublecomplex *work,
 	integer *lwork, doublereal *rwork, integer *info);
-
-EOF
-)
+")
 
 (define (lapack-extras:error x . rest)
   (let ((port (open-output-string)))
