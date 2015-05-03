@@ -208,9 +208,16 @@ EOF
                       ,ret ,errs (lambda (v) (fx/ (f64vector-length v) 2)) zcopy)))))
 
 (lapack-wrap-sd (geev jobvl jobvr nvec a lda wr wi vl ldvl vr ldvr work lwork info_)
-              (a wr wi vl vr work)
-              ((lambda (i) (conc i "-th element had an illegal value."))
-               (lambda (i) (conc "QR algorithm failed. Elements "
-                                 i
-                                 "+1:N of W(R|I) contain eigenvalues which have converged."))))
+                (a wr wi vl vr work)
+                ((lambda (i) (conc i "-th element had an illegal value."))
+                 (lambda (i) (conc "QR algorithm failed. Elements "
+                                   i
+                                   "+1:N of W(R|I) contain eigenvalues which have converged."))))
+(lapack-wrap-cz (geev jobvl jobvr nvec a lda w vl ldvl vr ldvr work lwork rwork info_)
+                (a w vl vr work)
+                ((lambda (i) (conc i "-th element had an illegal value."))
+                 (lambda (i) (conc "QR algorithm failed. Elements "
+                                   i
+                                   "+1:N of W contain eigenvalues which have converged."))))
+
 )
