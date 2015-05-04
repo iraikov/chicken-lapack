@@ -1,7 +1,7 @@
 language: C
 install:
   - sudo apt-get update -qq -y
-  - sudo apt-get install chicken-bin libatlas3-base libatlas-base-dev libatlas-dev
+  - sudo apt-get install chicken-bin libatlas3gf-base libatlas-base-dev libatlas-dev
 script: 
   - chicken -version
   - chicken-install -s -test
