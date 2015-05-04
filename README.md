@@ -317,13 +317,13 @@ in the respective storage format.
 
 ## Version history
 
-; 3.0 : Using bind instead of easyffi
-; 2.1 : Ensure that unit test script exists with a non-zero exit status on error (thanks to mario)
-; 2.0 : Eliminated reduntant atlas-lapack: prefix from names of exported symbols
+3.0 : Using bind instead of easyffi
+2.1 : Ensure that unit test script exists with a non-zero exit status on error (thanks to mario)
+2.0 : Eliminated reduntant atlas-lapack: prefix from names of exported symbols
 
 ## Requirements
 
-[[blas]]
+* [blas](http://wiki.call-cc.org/eggref/4/blas)
 
 ## License
 
