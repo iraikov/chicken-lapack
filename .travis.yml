@@ -1,16 +1,9 @@
-language: cpp
-compiler:
-    - gcc
-notifications:
-    email: false
-env:
-before_install:
-    - sudo apt-get update -qq -y
-    - sudo apt-get install chicken-bin libatlas3-base libatlas-base-dev libatlas-dev
-    - git config --global user.name "Travis User"
-    - git config --global user.email "travis@example.net"
-    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-script:
-    - chicken-install
-    - csi -s tests/run.scm
-after_success:
+language: C
+install:
+  - sudo apt-get update -qq -y
+  - sudo apt-get install chicken-bin libatlas3-base libatlas-base-dev libatlas-dev
+script: 
+  - chicken -version
+  - chicken-install -s -test
+  - csi -s tests/run.scm
+
