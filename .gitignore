@@ -1,0 +1,5 @@
+*.swp
+*.so
+a.out
+atlas-lapack.import.scm
+lapack-extras.import.scm

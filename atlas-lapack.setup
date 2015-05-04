@@ -20,7 +20,9 @@
 		     (t ()    #f)))))
 
 (define ld-options
-  (or (atlas-test ("<atlas/clapack.h>"   " -llapack_atlas -latlas -lm"))
+  (or (atlas-test ("<atlas/clapack.h>"   " -llapack -llapack_atlas -lf77blas -lgfortran -lcblas -latlas -lm"))
+      (atlas-test ("<clapack.h>"         " -llapack -llapack_atlas -lf77blas -lgfortran -lcblas -latlas -lm"))
+      (atlas-test ("<atlas/clapack.h>"   " -llapack_atlas -latlas -lm"))
       (atlas-test ("<clapack.h>"         " -llapack_atlas -latlas -lm"))
 
       (atlas-test ("<atlas/clapack.h>"   " -latlas -lm"))
@@ -43,9 +45,17 @@
 (compile -O3 -d0 -s atlas-lapack.scm -j atlas-lapack -L "\"" ,ld-options "\"" )
 (compile -O2 -d0 -s atlas-lapack.import.scm)
 
+(compile -O3 -d0 -s lapack-extras.scm -j lapack-extras -L "\"" ,ld-options "\"")
+(compile -O2 -d0 -s lapack-extras.import.scm)
+
 (install-extension
  'atlas-lapack
  `(,(dynld-name "atlas-lapack") ,(dynld-name "atlas-lapack.import") )
  `((version 3.1)
    ))
 
+(install-extension
+  'atlas-lapack
+  `(,(dynld-name "lapack-extras") ,(dynld-name "lapack-extras.import") )
+  `((version 0.1)
+    ))
