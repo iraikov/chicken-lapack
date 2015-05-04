@@ -2,7 +2,7 @@
 ;; Chicken Scheme bindings for the LAPACK routines in the ATLAS
 ;; library.
 ;;
-;; Copyright 2007-2015 Ivan Raikov
+;; Copyright 2007-2015 Ivan Raikov, Jeremy Steward
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as

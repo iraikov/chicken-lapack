@@ -21,6 +21,6 @@
 
  (test-depends test)
 
- (author "Ivan Raikov")
+ (author "Ivan Raikov, Jeremy Steward")
 
  (synopsis "An interface to the LAPACK routines implemented in ATLAS."))
