@@ -6,4 +6,4 @@ script:
   - chicken -version
   - chicken-install -s -test
   - csi -s tests/run.scm
-
+  - csi -s tests/test-eigen-driver-routines.scm
