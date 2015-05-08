@@ -4,7 +4,7 @@
 
  ; List here all the files that should be bundled as part of your egg.  
 
- (files "atlas-lapack.setup" "atlas-lapack.meta" "atlas-lapack.scm" "tests" )
+ (files "atlas-lapack.setup" "atlas-lapack.meta" "lapack-extras.scm" "atlas-lapack.scm" "tests" )
 
  ; Your egg's license:
 
@@ -21,6 +21,6 @@
 
  (test-depends test)
 
- (author "Ivan Raikov")
+ (author "Ivan Raikov, Jeremy Steward")
 
  (synopsis "An interface to the LAPACK routines implemented in ATLAS."))
