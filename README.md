@@ -1,19 +1,15 @@
 # chicken-lapack
 
-Chicken Scheme bindings for ATLAS and LAPACK
-
+Chicken Scheme bindings for the LAPACK and ATLAS libraries.
 
 ATLAS (http://math-atlas.sourceforge.net) stands for Automatically
 Tuned Linear Algebra Software. Its purpose is to provide portably
 optimal linear algebra routines. The current version provides a
 complete BLAS (http://www.netlib.org/blas) API (for both C and
 Fortran77), and a small subset of the LAPACK
-(http://www.netlib.org/lapack) API. Please see the documentation for
-the [[blas]] egg for definitions of the {{ORDER}}, {{UPLO}}, {{DIAG}}
-and {{TRANSPOSE}} datatypes.
+(http://www.netlib.org/lapack) API. 
 
 ## Naming conventions for routines
-
 
 Every routine in the LAPACK library comes in four flavors, each
 prefixed by the letters S, D, C, and Z, respectively. Each letter
@@ -39,6 +35,30 @@ For example, function xGESV (N-by-N linear system solver) comes in the following
 <tr><td>CGESV</td><td>cgesv</td><td>cgesv!</td><td>unsafe-cgesv!</td></tr>
 <tr><td>ZGESV</td><td>zgesv</td><td>zgesv!</td><td>unsafe-zgesv!</td></tr>
 </table>
+
+
+## LAPACK datatype conventions
+
+The datatype constructors described below are defined in the
+[blas](http://wiki.call-cc.org/eggref/4/blas) library.  The `blas`
+library must be loaded before using any of the routines in this
+library.
+
+Argument `ORDER` is one of `RowMajor` or `ColMajor` to
+indicate that the input and output matrices are in row-major or
+column-major form, respectively.
+
+Where present, argument `TRANS` can be one of `NoTrans` or `Trans` to
+indicate whether the input matrix is to be transposed or not.
+
+Where present, argument `UPLO` can be one of `Upper` or
+`Lower` to indicate whether the upper or lower triangular part
+of an input symmetric matrix is to referenced,or to specify the type
+of an input triangular matrix.
+
+Where present, argument `DIAG` can be one of `NonUnit` or
+`Unit` to indicate whether an input triangular matrix is unit
+triangular or not.
 
 
 ## LAPACK driver routines
@@ -317,18 +337,18 @@ in the respective storage format.
 
 ## Version history
 
-; 3.0 : Using bind instead of easyffi
-; 2.1 : Ensure that unit test script exists with a non-zero exit status on error (thanks to mario)
-; 2.0 : Eliminated reduntant atlas-lapack: prefix from names of exported symbols
+3.0 : Using bind instead of easyffi
+2.1 : Ensure that unit test script exists with a non-zero exit status on error (thanks to mario)
+2.0 : Eliminated reduntant atlas-lapack: prefix from names of exported symbols
 
 ## Requirements
 
-[[blas]]
+* [blas](http://wiki.call-cc.org/eggref/4/blas)
 
 ## License
 
 >
-> Copyright 2007-2015 Ivan Raikov
+> Copyright 2007-2015 Ivan Raikov, Jeremy Steward
 > 
 > This program is free software: you can redistribute it and/or modify
 > it under the terms of the GNU General Public License as published by
